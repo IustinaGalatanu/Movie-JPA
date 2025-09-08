@@ -6,22 +6,31 @@ import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
+import java.util.Objects;
+
 @Data
-@AllArgsConstructor
-@NoArgsConstructor
 @Entity
 @Table(name="movies_details")
 public class MovieDetails {
     @Id
-    @GeneratedValue(strategy= GenerationType.IDENTITY)
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
-
-    private String genre;
     private int duration;
     private String language;
+    @Column(length = 500)
+    private String synopsis;
 
-    @OneToOne
-    @JoinColumn(name = "movie_id", referencedColumnName = "id")
-    @JsonIgnore
-    private Movie movie;
+    @Override
+    public boolean equals(Object o) {
+        if (o == null || getClass() != o.getClass()) return false;
+        MovieDetails details = (MovieDetails) o;
+        return Objects.equals(id, details.id);
+    }
+
+    @Override
+    public int hashCode() {
+        return id != null? id.hashCode(id):0;
+    }
 }
+
+

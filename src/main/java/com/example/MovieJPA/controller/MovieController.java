@@ -1,6 +1,7 @@
 package com.example.MovieJPA.controller;
 
 import com.example.MovieJPA.model.Movie;
+import com.example.MovieJPA.model.dto.MovieDto;
 import com.example.MovieJPA.service.MovieService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
@@ -8,6 +9,7 @@ import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 import java.util.Optional;
+import java.util.stream.Collectors;
 
 @RestController
 @RequestMapping("/api/movies")
@@ -17,18 +19,22 @@ public class MovieController {
     MovieService service;
 
     @PostMapping
-    public ResponseEntity<Movie> createMovie(@RequestBody Movie movie){
-        return ResponseEntity.ok(service.save(movie));
+    public ResponseEntity<MovieDto> createMovie(@RequestBody MovieDto dto){
+        Movie movie=service.createFromDto(dto);
+        return ResponseEntity.ok(service.toDto(movie));
     }
 
     @GetMapping
-    public ResponseEntity<Iterable<Movie>> getAllMovies(){
-        return ResponseEntity.ok(service.findAll());
+    public ResponseEntity<List<MovieDto>> getAllMovies(){
+        return ResponseEntity.ok(service.findAll().stream().map(service::toDto).collect(Collectors.toList()));
     }
 
     @GetMapping("/{id}")
-    public ResponseEntity<Optional<Movie>> getMovieById(@PathVariable Long id){
-        return ResponseEntity.ok(service.findById(id));
+    public ResponseEntity<MovieDto> getMovieById(@PathVariable Long id) {
+        Optional<Movie> movieOptional = service.findById(id);
+        return movieOptional.map(movie -> ResponseEntity.ok(service.toDto(movie)))
+                .orElseGet(() -> ResponseEntity.notFound().build());
+
     }
 
     @DeleteMapping("/{id}")
@@ -37,30 +43,20 @@ public class MovieController {
         return ResponseEntity.noContent().build();
     }
 
-    @GetMapping("/director/{director}/{releaseYear}")
-    public ResponseEntity<List<Movie>> getByDirectorAndYear(@PathVariable String director, @PathVariable int releaseYear){
-        return ResponseEntity.ok(service.findByDirectorAndReleaseYear(director,releaseYear));
-    }
 
     @GetMapping("/watched")
-    public ResponseEntity<List<Movie>> getMoviesByWatched(){
-        return ResponseEntity.ok(service.findByWatchedTrue());
+    public ResponseEntity<List<MovieDto>> getMoviesByWatched(){
+        List<Movie> movies=service.findByWatchedTrue();
+        List<MovieDto> movieDtos=movies.stream().map(service::toDto).collect(Collectors.toList());
+        return ResponseEntity.ok(movieDtos);
+
     }
     @GetMapping("/rating/{rating}")
-    public ResponseEntity<List<Movie>> getMoviesByRating(@PathVariable Double rating){
-        return ResponseEntity.ok(service.findByRatingGraterThan(rating));
-    }
-    @GetMapping("/ratingSQL/{rating}")
-    public ResponseEntity<List<Movie>> getMoviesByRatingSQL(
-            @PathVariable Double rating
-    ){
-        return ResponseEntity.ok(service.findMoviesByRatingWithSQL(rating));
+    public ResponseEntity<List<MovieDto>> getMoviesByRating(@PathVariable Double rating){
+        List<Movie> movies=service.findByRatingGraterThan(rating);
+        List<MovieDto> movieDtos=movies.stream().map(service::toDto).collect(Collectors.toList());
+        return ResponseEntity.ok(movieDtos);
     }
 
-    @GetMapping("/ratingNativeSQL/{rating}")
-    public ResponseEntity<List<Movie>> getMoviesByRatingNativeSQL(
-            @PathVariable Double rating
-    ){
-        return ResponseEntity.ok(service.findMoviesByRatingWithNativeSQL(rating));
     }
-}
+
