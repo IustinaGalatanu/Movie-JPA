@@ -20,17 +20,7 @@ public class MovieDetails {
     @Column(length = 500)
     private String synopsis;
 
-    @Override
-    public boolean equals(Object o) {
-        if (o == null || getClass() != o.getClass()) return false;
-        MovieDetails details = (MovieDetails) o;
-        return Objects.equals(id, details.id);
-    }
 
-    @Override
-    public int hashCode() {
-        return id != null? id.hashCode(id):0;
-    }
 }
 
 
