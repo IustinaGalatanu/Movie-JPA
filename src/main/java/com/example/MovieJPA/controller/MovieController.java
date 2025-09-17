@@ -26,15 +26,19 @@ public class MovieController {
 
     @GetMapping
     public ResponseEntity<List<MovieDto>> getAllMovies(){
-        return ResponseEntity.ok(service.findAll().stream().map(service::toDto).collect(Collectors.toList()));
+        return ResponseEntity.ok(
+                service.findAll().stream()
+                        .map(service::toDto)
+                        .collect(Collectors.toList())
+        );
     }
 
     @GetMapping("/{id}")
     public ResponseEntity<MovieDto> getMovieById(@PathVariable Long id) {
         Optional<Movie> movieOptional = service.findById(id);
-        return movieOptional.map(movie -> ResponseEntity.ok(service.toDto(movie)))
+        return movieOptional
+                .map(movie -> ResponseEntity.ok(service.toDto(movie)))
                 .orElseGet(() -> ResponseEntity.notFound().build());
-
     }
 
     @DeleteMapping("/{id}")
